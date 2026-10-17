@@ -31,7 +31,8 @@ audit_log.jsonl                  full sandbox operation log (hash-chained, PII-m
 audit_log.html                   the same log as a readable table
 chain_verification.json          result of recomputing the hash chain: {valid, entries, head_hash}
 receipts/*.pdf, receipts/*.json  receipts of executed sandbox transfers (with transaction fingerprints)
-scenario_report.html/.md/.json   scenario suite: pass rate by category and every case
+scenario_report.html/.md/.json   scenario suite (offline, mock model): pass rate by category and every case
+scenario_report_real.*           the chat-driven cases re-run with the real model (recorded separately)
 rules.md                         config/rules.yaml rendered, with source and verified / to-verify badges
 screenshots/*.png                screenshots from the latest demo autopilot run, if present
 video/*                          demo video from the latest autopilot run, if present
@@ -97,10 +98,11 @@ def build_pack(session: Session, model_label: str) -> bytes:
             for p in (t.receipt_pdf_path, t.receipt_json_path):
                 if p and Path(p).exists():
                     z.write(p, f"receipts/{Path(p).name}")
-        for ext in ("html", "md", "json"):
-            p = EVIDENCE_DIR / f"scenario_report.{ext}"
-            if p.exists():
-                z.write(p, f"scenario_report.{ext}")
+        for stem in ("scenario_report", "scenario_report_real"):  # mock suite + real-model re-run (kept separate)
+            for ext in ("html", "md", "json"):
+                p = EVIDENCE_DIR / f"{stem}.{ext}"
+                if p.exists():
+                    z.write(p, f"{stem}.{ext}")
         z.writestr("rules.md", rules_markdown())
         shots = sorted((EVIDENCE_DIR / "screenshots").glob("*.png")) or sorted((ROOT / "docs" / "img").glob("*.png"))
         for p in shots:  # latest autopilot run, else the committed copies in docs/img

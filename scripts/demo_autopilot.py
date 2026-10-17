@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import argparse
 import json
+from contextlib import contextmanager
 import shutil
 import subprocess
 import sys
@@ -30,6 +31,25 @@ SHOTS = EVIDENCE / "screenshots"
 VIDEO = EVIDENCE / "video"
 DOCS_IMG = ROOT / "docs" / "img"
 LONG = 180_000  # ms; generous for real-LLM latency
+FF_SPEED = 4         # agent-waiting stretches are sped up this much in the edited video (badge shown on screen)
+TYPE_DELAY_MS = 75   # per Latin character, multiplied by --pace
+CJK_FACTOR = 2.6     # Chinese characters are typed slower so viewers can read them
+TYPE_HOLD_S = 1.6    # seconds the finished message stays in the box before sending (× pace)
+
+
+FF_BADGE_JS = """on => {
+  let b = document.getElementById('ff-badge');
+  if (!on) { if (b) b.remove(); return; }
+  if (!b) {
+    b = document.createElement('div');
+    b.id = 'ff-badge';
+    b.textContent = '⏩ Agent working — sped up %dx';
+    b.style.cssText = 'position:fixed;top:96px;left:50%%;transform:translateX(-50%%);z-index:9999;' +
+      'background:#16202e;color:#f6f3ec;padding:10px 22px;border-radius:999px;font:600 20px "IBM Plex Sans",sans-serif;' +
+      'box-shadow:0 8px 24px rgba(0,0,0,.25)';
+    document.body.appendChild(b);
+  }
+}""" % (FF_SPEED, )
 
 
 class Autopilot:
@@ -37,6 +57,22 @@ class Autopilot:
         self.page = page
         self.base = base.rstrip("/")
         self.pace = pace
+        self.t0 = time.monotonic()  # the video starts when the page is created
+        self.segments: list[tuple[float, float]] = []  # agent waiting time, sped up in the edit
+
+    @contextmanager
+    def fast_forward(self):
+        """Mark a stretch where the viewer only waits for the model; it is sped up FF_SPEED× in the edit,
+        and a visible badge says so."""
+        self.page.evaluate(FF_BADGE_JS, True)
+        start = time.monotonic() - self.t0
+        try:
+            yield
+        finally:
+            end = time.monotonic() - self.t0
+            self.page.evaluate(FF_BADGE_JS, False)
+            if end - start >= 2.0:
+                self.segments.append((start + 0.2, end - 0.1))
 
     # ------------------------------------------------------------------ primitives
     def tid(self, name: str):
@@ -74,17 +110,29 @@ class Autopilot:
         except Exception:
             pass
 
+    def type_readably(self, text: str) -> None:
+        """Type at a pace a viewer can follow (Chinese characters slower), then hold before sending."""
+        box = self.tid("chat-input")
+        box.click()
+        per_char = TYPE_DELAY_MS * self.pace
+        for ch in text:
+            box.press_sequentially(ch)
+            cp = ord(ch)
+            cjk = 0x4E00 <= cp <= 0x9FFF or 0x3000 <= cp <= 0x303F or 0xFF00 <= cp <= 0xFFEF
+            self.page.wait_for_timeout(int(per_char * (CJK_FACTOR if cjk else 1)))
+        self.pause(TYPE_HOLD_S)  # the full message stays on screen before it is sent
+
     def ask(self, text: str, upload: str | None = None, wait_for: str = "card-intent") -> None:
         """Type a message (and optionally upload a sample with it), then wait for a new card."""
         before = self.count(wait_for)
-        box = self.tid("chat-input")
-        box.click()
-        box.press_sequentially(text, delay=28)
+        self.type_readably(text)
         if upload:
             self.tid("upload-input").set_input_files(str(SAMPLES / upload))
         else:
             self.tid("chat-send").click()
-        self.wait_more(wait_for, before)
+        self.pause(0.8)  # the sent message and the "checking…" bubble appear at normal speed
+        with self.fast_forward():
+            self.wait_more(wait_for, before)
         self.pause(0.6)
 
     def persona(self, which: str) -> None:
@@ -133,7 +181,8 @@ class Autopilot:
         self.shot("06_student_confirm")
         before = self.count("card-receipt")
         self.tid("approve-button").click()
-        self.wait_more("card-receipt", before)
+        with self.fast_forward():
+            self.wait_more("card-receipt", before)
         self.focus(self.tid("card-receipt").last)
         self.caption("Paid in sandbox — receipt + log")
         self.shot("07_receipt")
@@ -212,7 +261,8 @@ class Autopilot:
         self.tid("export-pack").wait_for()
         with p.expect_download(timeout=LONG) as dl:
             self.tid("export-pack").click()
-        dl.value.save_as(str(EVIDENCE / "pack_autopilot.zip"))
+        (EVIDENCE / "tmp").mkdir(parents=True, exist_ok=True)
+        dl.value.save_as(str(EVIDENCE / "tmp" / "pack_during_recording.zip"))  # final pack is fetched after the video is saved
         self.caption("One-click evidence pack")
 
         p.goto(f"{self.base}/outro?demo=1")
@@ -229,13 +279,31 @@ def reset(base: str) -> dict:
         return json.loads(r.read())
 
 
-def to_mp4(webm: Path) -> Path | None:
+def to_mp4(webm: Path, segments: list[tuple[float, float]] | None = None) -> Path | None:
+    """Encode to MP4. Marked agent-waiting segments are sped up FF_SPEED× (the badge is in those frames);
+    everything else plays at normal speed. The unedited recording is kept as the .webm."""
     if not shutil.which("ffmpeg"):
         print("ffmpeg not found — keeping the .webm only")
         return None
     mp4 = webm.with_suffix(".mp4")
-    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(webm), "-c:v", "libx264", "-pix_fmt", "yuv420p",
-                    "-crf", "26", "-movflags", "+faststart", str(mp4)], check=True)
+    total = video_seconds(webm) or 0
+    parts, cursor = [], 0.0
+    for s, e in sorted(segments or []):
+        s, e = max(s, cursor), min(e, total or e)
+        if e - s < 1.0:
+            continue
+        parts.append((cursor, s, 1))
+        parts.append((s, e, FF_SPEED))
+        cursor = e
+    parts.append((cursor, None, 1))
+    chains, labels = [], []
+    for i, (s, e, speed) in enumerate(parts):
+        trim = f"trim=start={s:.3f}" + (f":end={e:.3f}" if e is not None else "")
+        chains.append(f"[0:v]{trim},setpts=(PTS-STARTPTS)/{speed}[v{i}]")
+        labels.append(f"[v{i}]")
+    graph = ";".join(chains) + f";{''.join(labels)}concat=n={len(parts)}:v=1:a=0,fps=25[out]"
+    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(webm), "-filter_complex", graph, "-map", "[out]",
+                    "-c:v", "libx264", "-pix_fmt", "yuv420p", "-crf", "24", "-movflags", "+faststart", str(mp4)], check=True)
     return mp4
 
 
@@ -261,7 +329,7 @@ def main() -> int:
         print("Note: recording with the MOCK model. The submitted video must use a real LLM (set LLM_PROVIDER in .env).")
     for d in (SHOTS, VIDEO):
         d.mkdir(parents=True, exist_ok=True)
-    for old in list(SHOTS.glob("*.png")) + list(VIDEO.glob("*.webm")):
+    for old in list(SHOTS.glob("*.png")) + list(VIDEO.glob("*.webm")) + list(VIDEO.glob("*.mp4")):
         old.unlink()
 
     started = time.time()
@@ -273,25 +341,56 @@ def main() -> int:
             ctx_args.update(record_video_dir=str(VIDEO), record_video_size={"width": 1920, "height": 1080})
         context = browser.new_context(**ctx_args)
         page = context.new_page()
+        pilot = Autopilot(page, args.base_url, args.pace)
         try:
-            Autopilot(page, args.base_url, args.pace).run()
+            pilot.run()
         finally:
             video = page.video
             context.close()
             browser.close()
         if video and not args.no_video:
             raw = Path(video.path())
-            webm = VIDEO / "bridge_demo.webm"
+            webm = VIDEO / "bridge_demo_unedited.webm"
             raw.replace(webm)
-            mp4 = to_mp4(webm)
-            print(f"Video: {webm}" + (f" and {mp4}" if mp4 else ""))
+            waited = sum(e - s for s, e in pilot.segments)
+            print(f"Agent waiting time: {waited:.0f}s in {len(pilot.segments)} stretches (sped up {FF_SPEED}x in the MP4)")
+            mp4 = to_mp4(webm, pilot.segments)
+            if mp4:
+                mp4.replace(VIDEO / "bridge_demo.mp4")
+                mp4 = VIDEO / "bridge_demo.mp4"
+            print(f"Video: {mp4 or webm} (unedited recording: {webm})")
 
     DOCS_IMG.mkdir(parents=True, exist_ok=True)
     for png in sorted(SHOTS.glob("*.png")):
         shutil.copy2(png, DOCS_IMG / png.name)
     print(f"{len(list(SHOTS.glob('*.png')))} screenshots → {SHOTS} (copied to {DOCS_IMG}); "
           f"run time {time.time() - started:.0f}s")
+    duration = video_seconds(VIDEO / "bridge_demo.mp4") or video_seconds(VIDEO / "bridge_demo_unedited.webm")
+    if duration:
+        print(f"Video length {int(duration // 60)}:{int(duration % 60):02d}" + ("  (over the 5:00 limit!)" if duration > 300 else ""))
+    pack = save_pack(args.base_url)
+    print(f"Evidence pack of this recorded run: {pack}")
     return 0
+
+
+def video_seconds(path: Path) -> float | None:
+    if not path.exists() or not shutil.which("ffprobe"):
+        return None
+    out = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(path)],
+                         capture_output=True, text=True)
+    try:
+        return float(out.stdout.strip())
+    except ValueError:
+        return None
+
+
+def save_pack(base: str) -> Path:
+    """Export the evidence pack of the session just recorded (its audit log, receipts, the new video)."""
+    with urllib.request.urlopen(f"{base.rstrip('/')}/api/evidence/export", timeout=120) as r:
+        data = r.read()
+    path = EVIDENCE / f"pack_{time.strftime('%Y%m%d_%H%M%S')}.zip"
+    path.write_bytes(data)
+    return path
 
 
 if __name__ == "__main__":

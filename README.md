@@ -131,7 +131,7 @@ Without `make` (e.g. on Windows), run the commands shown in the [Makefile](Makef
 | `make docs` | Regenerates the `<!-- AUTO:… -->` doc sections and `docs/TEST_CASES.md` |
 | `make docs-pdf` | Docs as PDF (needs pandoc) |
 
-The submitted demo video must be recorded with a real LLM. Set `.env`, start the app, then run `make autopilot` (use `--pace 1.8` for about 4½ minutes with voice-over room).
+The submitted demo video must be recorded with a real LLM. Set `.env`, start the app, then run `python scripts/demo_autopilot.py --pace 1.8` (about 4¼ minutes with Gemini). Time spent only waiting for the model is sped up 4× in `evidence/video/bridge_demo.mp4`, with an on-screen "⏩ sped up" badge; the unedited recording is kept next to it.
 
 ## How this maps to the judging criteria
 

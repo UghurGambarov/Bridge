@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { CardView } from "../cards/Cards";
 import { api } from "../lib/api";
 import { personaName, PERSONA } from "../lib/format";
+import { isDemo } from "../lib/demo";
 import { useStore } from "../lib/store";
 import { RichText } from "./RichText";
 
@@ -110,6 +111,7 @@ const PROMPTS: Record<string, string[]> = {
 };
 
 export function Composer() {
+  const demo = isDemo();
   const { send, upload, busy, persona, ready } = useStore();
   const [text, setText] = useState("");
   const [samples, setSamples] = useState<string[]>([]);
@@ -151,7 +153,7 @@ export function Composer() {
           placeholder={persona === PERSONA.mother ? "Write to Bridge… 用中文或英文都可以" : "Write to Bridge…"}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submit(); } }}
-          className="h-[46px] min-h-[46px] flex-1 resize-none rounded-md border border-rule-strong bg-paper px-3.5 py-3 text-[15px] outline-none focus:border-ink" />
+          className={`h-[46px] min-h-[46px] flex-1 resize-none rounded-md border border-rule-strong bg-paper px-3.5 outline-none focus:border-ink ${demo ? "py-2 text-[20px] font-medium" : "py-3 text-[15px]"}`} />
         <button data-testid="chat-send" className="btn-primary h-[46px] px-5" disabled={busy || !text.trim()} onClick={submit}>Send</button>
       </div>
       <div className="mt-1.5 text-[11.5px] text-ink-mute">
