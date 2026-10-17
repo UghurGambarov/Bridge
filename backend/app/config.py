@@ -50,7 +50,7 @@ class Settings:
         if self.llm_provider == "mock":
             return "MOCK — tests only"
         if self.llm_provider == "anthropic":
-            return f"anthropic · {self.anthropic_model or 'unset'}"
+            return f"anthropic · {self.anthropic_model or 'claude-opus-5-5'}"
         return f"{self.llm_provider} · {self.llm_model or 'unset'}"
 
 

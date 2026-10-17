@@ -19,6 +19,12 @@ All dependencies are permissively licensed. No agent frameworks (LangChain, Lang
 | python-multipart | File uploads | Apache-2.0 |
 | python-dotenv | `.env` loading | BSD-3-Clause |
 
+## Optional
+
+| Package | Purpose | License |
+|---|---|---|
+| anthropic | Anthropic provider (`LLM_PROVIDER=anthropic`); imported only when selected | MIT |
+
 ## Development only (`backend/requirements-dev.txt`)
 
 | Package | Purpose | License |

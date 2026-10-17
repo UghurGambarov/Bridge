@@ -234,4 +234,14 @@ def assess_document(session: Session, extracted: Any, findings: dict, today: dat
         "hidden_spans": findings.get("hidden_spans", []),
         "notices": notices,
         "purpose_guess": guess_purpose(text),
+        "mentioned_institution_id": inst.id if inst else _mentioned_institution(session, text),
     }
+
+
+def _mentioned_institution(session: Session, text: str) -> Optional[str]:
+    """A registered institution named anywhere in the text (used only to address a verification email)."""
+    low = (text or "").lower()
+    for i in registry.institutions(session):
+        if i.name.lower() in low:
+            return i.id
+    return None

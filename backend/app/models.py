@@ -245,3 +245,18 @@ class AuditEntry(SQLModel, table=True):
 class SystemState(SQLModel, table=True):
     key: str = Field(primary_key=True)
     value: str
+
+
+# ------------------------------------------------------------------ chat sessions (planner history, append-only)
+class ChatSession(SQLModel, table=True):
+    id: str = Field(primary_key=True)
+    created_at: NaiveDatetime
+    active_persona: Optional[str] = None
+
+
+class ChatMessage(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    session_id: str = Field(index=True)
+    payload: dict = json_dict()   # internal planner message (what the model saw / said)
+    display: dict = json_dict()   # what the UI shows for this message (text + cards), may be empty
+    created_at: NaiveDatetime

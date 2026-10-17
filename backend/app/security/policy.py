@@ -59,6 +59,7 @@ TOOLS: dict[str, ToolSpec] = {
     "build_document_list": ToolSpec("T1", {"intent_id": "str"}, ("intent_id",)),
     "draft_verification_email": ToolSpec("T1", {"institution_id": "str", "doc_id": "str"}, ("institution_id",)),
     "explain_decision": ToolSpec("T0", {"intent_id": "str"}, ("intent_id",)),
+    "ask_clarifying_question": ToolSpec("T0", {"question": "str"}, ("question",)),
 }
 
 # Raw payment identifiers the model must never supply (T4-007).

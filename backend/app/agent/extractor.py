@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import re
 from datetime import date, datetime
+from pathlib import Path
 from decimal import Decimal, InvalidOperation
 from typing import Optional
 
@@ -153,6 +154,24 @@ def regex_extract(text: str) -> ExtractedDocument:
         bits.append(f"due {fields.due_date}")
     fields.summary_en = (" ".join(bits))[:300]
     return fields
+
+
+EXTRACTOR_SYSTEM = (Path(__file__).parent / "prompts" / "extractor_system.md").read_text(encoding="utf-8")
+
+
+def make_extractor(provider) -> "callable":
+    """Quarantined LLM extractor: no tools, JSON only, Pydantic-validated (extra fields forbidden).
+
+    Mock mode always uses the regex parser. Any failure (network, invalid JSON, schema violation)
+    makes documents.ingest fall back to the regex parser.
+    """
+    def run(visible_text: str) -> ExtractedDocument:
+        if provider is None or provider.is_mock:
+            return regex_extract(visible_text)
+        data = provider.extract_json(EXTRACTOR_SYSTEM, visible_text[:20000])
+        return ExtractedDocument.model_validate(data)
+
+    return run
 
 
 def days_until(due_date: Optional[str], today: datetime) -> Optional[int]:

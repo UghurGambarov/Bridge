@@ -22,3 +22,18 @@ Where the spec was ambiguous we picked the simplest option that preserves the se
 16. **`schedule_allowance` creates an inactive schedule** that the payer activates. Creating a standing autonomous instruction is a preparation step (T1), not an action.
 17. **Autonomous allowance needs quota.** If the payer's remaining quota is too small, the allowance is held and the documented route is suggested (case T-04).
 18. **No `make` on the Windows dev machine.** The Makefile targets the Linux CI and Docker; each target's command can be run directly.
+
+## Phase 2 — agent and API
+
+19. **`ask_clarifying_question` is a T0 tool.** The spec needs a `clarify` card for vague requests; making it a read-only tool keeps every card code-built and lets case N-04 assert that no T1+ tool ran.
+20. **Pasted content is quarantined.** A chat message of 280+ characters or 4+ lines is ingested as a text document; the planner sees only a note, the document ID and (if short and harmless) the user's last line. This keeps the dual-LLM guarantee when someone pastes a WeChat message instead of uploading it.
+21. **What the planner sees from a document:** schema-validated fields with account numbers masked and free-text fields sanitised (invisible characters stripped, any injection phrase replaced, truncated), plus detector counts. Never raw text, never hidden-span text.
+22. **Step budget.** At most 8 tool calls per turn; after the 8th, one last call *without tools* lets the model write its reply.
+23. **Execution after approvals.** When the last approval arrives, the API runs the agent with an `approvals_complete` event and the agent calls `execute_payment`, which the policy engine re-checks in full. The approval routes themselves never move money.
+24. **Anthropic provider** uses the official `anthropic` SDK as an optional dependency (lazy import), default model `claude-opus-5-5`, effort `medium`, server-side refusal fallbacks enabled (`fallbacks: "default"`). Assistant content blocks (including thinking blocks) are stored and replayed unchanged, so the planner history is append-only. The OpenAI-compatible provider uses plain `httpx`.
+25. **AI note in the Chinese summary** (real models only) is dropped if it contains any digit, so numbers can only come from the template.
+26. **Status messages written by code** (allowance sent, bank verification) are labelled "System", not "AI-generated"; every planner message carries the AI-001 label.
+27. **Scenario runner** drives the real API through FastAPI's TestClient on a fresh temp database per case. Rule IDs are collected from the audit log, cards and API errors, so a case passes only if the control actually fired.
+28. **App factory.** Run with `uvicorn app.main:create_app --factory`; tests and the scenario suite build isolated apps with their own engine and LLM.
+29. **Uploads** are limited to PDF, TXT and EML files of at most 5 MB.
+30. **Admin endpoints are unauthenticated in the sandbox** (freeze, advance clock, reset). Every call is audited; production needs operator authentication (known risk R-14).
