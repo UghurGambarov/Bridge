@@ -14,6 +14,7 @@ from ..config import get_settings
 from ..models import Institution, PaymentChannel, PaymentIntent, Person, Transfer
 from ..security import approvals
 from ..security.masking import mask_name
+from . import fx
 
 
 def receipt_data(session: Session, transfer: Transfer, intent: PaymentIntent, audit_range: tuple[int, int],
@@ -44,7 +45,7 @@ def receipt_data(session: Session, transfer: Transfer, intent: PaymentIntent, au
                   "institution": inst.name if inst else None},
         "amount": f"{transfer.amount:.2f}",
         "currency": transfer.currency,
-        "fx_rate_cny": f"{transfer.fx_rate}",
+        "fx_rate_cny": fx.rate_str(transfer.fx_rate),
         "fx_label": "simulated",
         "cny_debit": f"{transfer.cny_debit:.2f}",
         "fee_cny": f"{transfer.fee_cny:.2f}",

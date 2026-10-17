@@ -19,6 +19,16 @@ All dependencies are permissively licensed. No agent frameworks (LangChain, Lang
 | python-multipart | File uploads | Apache-2.0 |
 | python-dotenv | `.env` loading | BSD-3-Clause |
 
+## Frontend (`frontend/package.json`, bundled at build time — nothing loaded from a CDN)
+
+| Package | Purpose | License |
+|---|---|---|
+| React, React DOM | UI | MIT |
+| Vite, @vitejs/plugin-react | Build and dev server | MIT |
+| TypeScript | Type checking | Apache-2.0 |
+| Tailwind CSS, PostCSS, Autoprefixer | Styling | MIT |
+| @fontsource/fraunces, @fontsource/ibm-plex-sans, @fontsource/ibm-plex-mono | Self-hosted fonts | Packages MIT; fonts SIL Open Font License 1.1 |
+
 ## Optional
 
 | Package | Purpose | License |

@@ -14,10 +14,18 @@ Chinese families struggle to pay tuition abroad safely and legally because of sc
 |---|---|---|
 | 1 | Domain and security kernel: models, seed, registry, FX, personal quota, structuring, policy engine (all rule IDs), digest-bound approvals, hash-chained audit + tamper simulation, masking, sandbox bank + receipt PDFs, detectors, risk, request guard, sample generator, `rules.yaml` | Done |
 | 2 | LLM providers (mock, malicious, OpenAI-compatible, Anthropic), quarantined extractor, Chinese summary, orchestrator, tools, full API, scenario suite (39 cases, 100% in mock mode) | Done |
-| 3 | UI (persona toggle, Why panel, Evidence Center), Docker | Next |
-| 4 | Evidence pack, demo autopilot, docs, CI badge | — |
+| 3 | React UI (persona toggle Mother / Li Wei, cards, Why panel, approval + consent modals, Evidence Center, demo mode, intro/outro), single-container Docker | Done |
+| 4 | Evidence pack script, demo autopilot, docs, CI badge | Next |
 
-## Quickstart (backend)
+## Quickstart (Docker)
+
+```bash
+docker compose up --build          # app at http://localhost:8000 (mock model unless .env sets a provider)
+```
+
+Open http://localhost:8000, accept the sandbox consent, pick `northbridge_invoice_autumn.pdf` from **Sample docs…**, approve as **Mother**, switch to **Li Wei** and confirm. The Evidence Center (top right) verifies the hash chain, runs the scenario suite and exports the evidence pack. Demo mode: http://localhost:8000/?demo=1 (caption bar), title cards at `/intro` and `/outro`.
+
+## Quickstart (development)
 
 ```bash
 python -m venv .venv
@@ -26,10 +34,11 @@ cp .env.example .env                                      # optional: choose an 
 python scripts/generate_samples.py                        # fictional sample documents -> samples/
 python -m pytest                                          # unit tests + scenario suite, offline, no API keys
 python scenarios/runner.py                                # writes evidence/scenario_report.{json,md,html}
-cd backend && python -m uvicorn app.main:create_app --factory --port 8000   # API at http://localhost:8000/api
+cd frontend && npm ci && npm run build && cd ..                          # UI -> frontend/dist
+cd backend && python -m uvicorn app.main:create_app --factory --port 8000   # app at http://localhost:8000
 ```
 
-With `make`: `make install samples test scenarios serve`. API docs: http://localhost:8000/docs.
+With `make`: `make install samples test scenarios frontend serve`, or `make dev` for the backend with reload plus the Vite dev server on :5173. API docs: http://localhost:8000/docs.
 
 ### LLM providers (`.env`)
 
@@ -52,6 +61,7 @@ registry/           verified (fictional) institution registry
 backend/app/agent/  orchestrator, tools, quarantined extractor, Chinese summary, LLM providers, prompts
 backend/app/api/    FastAPI routes (session, chat, documents, intents, quota, audit, evidence, admin, demo)
 scenarios/          cases.yaml (39 cases) and runner.py
+frontend/           React + Vite + TypeScript + Tailwind UI (served by FastAPI in production)
 evidence/           latest scenario report
 scripts/            sample generator, Phase 1 demo
 samples/            generated sample documents (SANDBOX SAMPLE)

@@ -13,6 +13,15 @@ def q2(x: Decimal) -> Decimal:
     return Decimal(x).quantize(CENT, rounding=ROUND_HALF_UP)
 
 
+def rate_str(rate) -> str:
+    """Human rate: at least 2 decimals, trailing zeros trimmed (9.200000 -> 9.20, 0.913500 -> 0.9135)."""
+    if rate is None:
+        return ""
+    s = f"{Decimal(str(rate)):.6f}".rstrip("0")
+    whole, _, frac = s.partition(".")
+    return f"{whole}.{frac.ljust(2, '0')}"
+
+
 class UnsupportedCurrency(ValueError):
     pass
 

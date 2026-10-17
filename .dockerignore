@@ -1,0 +1,12 @@
+.git
+.venv
+.claude
+**/__pycache__
+**/.pytest_cache
+frontend/node_modules
+frontend/dist
+data
+evidence/video
+evidence/screenshots
+evidence/pack_*.zip
+.env

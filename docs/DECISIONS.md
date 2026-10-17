@@ -37,3 +37,15 @@ Where the spec was ambiguous we picked the simplest option that preserves the se
 28. **App factory.** Run with `uvicorn app.main:create_app --factory`; tests and the scenario suite build isolated apps with their own engine and LLM.
 29. **Uploads** are limited to PDF, TXT and EML files of at most 5 MB.
 30. **Admin endpoints are unauthenticated in the sandbox** (freeze, advance clock, reset). Every call is audited; production needs operator authentication (known risk R-14).
+
+## Phase 3 — UI and packaging
+
+31. **No router or state library.** A 20-line `pushState` router and one React context are enough for four routes and keep the dependency list short.
+32. **Fonts are bundled** (`@fontsource` packages, SIL OFL): Fraunces for display, IBM Plex Sans / Mono for text and fingerprints. Nothing is loaded from a CDN at runtime; Chinese text falls back to the system CJK font.
+33. **Colour only for verdicts.** The interface is ink-on-paper; green / amber / red appear only on pass / needs-approval / block states.
+34. **Persona devices.** Each persona's device secret lives in the browser's localStorage. If the server no longer knows a device (for example after "Reset demo"), the UI re-enrols once and retries the challenge.
+35. **Cards are snapshots, intents are live.** Intent and approval-status cards render the latest state from `GET /intents`, so a card in the chat history moves from "Awaiting approval" to "Paid" without reloading.
+36. **Sample-document picker.** `GET /api/samples` lists the fictional SANDBOX samples (strict filename allow-list) so judges can click through the flows without a file picker.
+37. **Upload sends the typed text with the document** (or a default "please check this document" message), so one action produces the full card sequence.
+38. **Results of operator controls** (advance clock, bank verification) are posted into the chat as "System" messages, not AI messages.
+39. **Docker.** Multi-stage build (Node 20 builds the UI, `python:3.11-slim` runs it), non-root user, health check, samples generated at build time, data in a named volume. `GIT_COMMIT` is passed as a build argument so the evidence pack can record it without git in the image.

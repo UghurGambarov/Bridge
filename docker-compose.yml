@@ -1,0 +1,17 @@
+services:
+  bridge:
+    build:
+      context: .
+      args:
+        GIT_COMMIT: ${GIT_COMMIT:-unknown}
+    image: bridge:latest
+    ports:
+      - "8000:8000"
+    env_file:
+      - path: .env
+        required: false   # without .env the app runs with the mock model
+    volumes:
+      - bridge-data:/app/data
+
+volumes:
+  bridge-data:

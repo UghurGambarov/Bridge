@@ -176,3 +176,36 @@ def test_rate_limit(client, started):
     codes = [client.post("/api/chat", json={"session_id": s["session_id"], "person_id": "p_zhang_min",
                                             "message": "help"}).json() for _ in range(3)]
     assert codes[2]["cards"][0]["rule_id"] == "SYS-002"
+
+
+def test_samples_and_known_risks(client):
+    names = client.get("/api/samples").json()["samples"]
+    assert "northbridge_invoice_autumn.pdf" in names
+    assert client.get("/api/samples/northbridge_invoice_autumn.pdf").content[:5] == b"%PDF-"
+    assert client.get("/api/samples/..%2Fconfig%2Frules.yaml").status_code == 404
+    assert client.get("/api/samples/rules.yaml").status_code == 404
+    risks = client.get("/api/known-risks").json()["risks"]
+    assert len(risks) == 14 and risks[0]["id"] == "R-01"
+
+
+def test_rate_formatting():
+    from decimal import Decimal
+
+    from app.sandbox.fx import rate_str
+
+    assert rate_str(Decimal("9.200000")) == "9.20"
+    assert rate_str(Decimal("0.910000")) == "0.91"
+    assert rate_str(Decimal("7.123400")) == "7.1234"
+    assert rate_str(Decimal("1")) == "1.00"
+
+
+def test_frontend_served_when_built(engine, tmp_path, monkeypatch):
+    from app import main
+
+    dist = tmp_path / "dist"
+    (dist / "assets").mkdir(parents=True)
+    (dist / "index.html").write_text("<html>bridge</html>", encoding="utf-8")
+    monkeypatch.setattr(main, "FRONTEND_DIST", dist)
+    c = TestClient(main.create_app(engine, llm=MockLLM()))
+    assert "bridge" in c.get("/evidence").text          # SPA route -> index.html
+    assert c.get("/api/health").json()["status"] == "ok"  # API still wins

@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import io
 import json
+import os
 import subprocess
 import zipfile
 from datetime import datetime
@@ -42,6 +43,9 @@ no whitespace, UTF-8. The first prev_hash is 64 zeros.
 
 
 def git_commit() -> Optional[str]:
+    env = os.getenv("GIT_COMMIT")
+    if env and env != "unknown":
+        return env  # set at docker build time
     try:
         return subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT, capture_output=True, text=True,
                               timeout=5).stdout.strip() or None

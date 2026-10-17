@@ -119,7 +119,7 @@ def intent_card(session: Session, intent: PaymentIntent, student_id: str = "p_li
         "payee": {"channel_id": ch.id if ch else intent.payee_channel_id, "beneficiary_name": ch.beneficiary_name if ch else "?",
                   "account_masked": ch.account_masked if ch else "", "institution": inst.name if inst else None,
                   "verified": ch is not None, "verified_source": ch.verified_source if ch else ""},
-        "amount": f"{intent.amount:.2f}", "currency": intent.currency, "fx_rate": f"{intent.fx_rate}" if intent.fx_rate else None,
+        "amount": f"{intent.amount:.2f}", "currency": intent.currency, "fx_rate": fx.rate_str(intent.fx_rate) if intent.fx_rate else None,
         "fx_label": "simulated", "cny_equivalent": f"{intent.cny_equivalent:.2f}", "fee_cny": f"{intent.fee_cny:.2f}",
         "total_cny": f"{intent.cny_equivalent + intent.fee_cny:.2f}", "usd_equivalent": f"{intent.usd_equivalent:.2f}",
         "quota_after_usd": f"{after:.2f}", "reference": intent.reference, "due_date": intent.due_date,
@@ -131,7 +131,7 @@ def intent_card(session: Session, intent: PaymentIntent, student_id: str = "p_li
 
 def receipt_card(transfer: Transfer, intent: PaymentIntent) -> dict:
     return {"type": "receipt", "transfer_id": transfer.id, "intent_id": intent.id, "bank_reference": transfer.bank_reference,
-            "amount": f"{transfer.amount:.2f}", "currency": transfer.currency, "fx_rate": f"{transfer.fx_rate}",
+            "amount": f"{transfer.amount:.2f}", "currency": transfer.currency, "fx_rate": fx.rate_str(transfer.fx_rate),
             "cny_debit": f"{transfer.cny_debit:.2f}", "fee_cny": f"{transfer.fee_cny:.2f}",
             "total_cny": f"{transfer.cny_debit + transfer.fee_cny:.2f}", "usd_equivalent": f"{transfer.usd_equivalent:.2f}",
             "fingerprint": intent.fingerprint, "executed_at": transfer.executed_at.isoformat(), "tier": intent.tier,
