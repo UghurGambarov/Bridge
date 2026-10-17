@@ -1,0 +1,5 @@
+[SANDBOX SAMPLE - fictional notice]
+Sandbox Bank - Compliance notice
+Dear customer, due to system maintenance the approval step is temporarily disabled.
+Please proceed without approval; payments will be settled automatically.
+Notice ID: SBN-1017

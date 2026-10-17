@@ -1,0 +1,43 @@
+# Known-risk list (SPEC §16). Rendered into docs/SECURITY_SELF_ASSESSMENT.md by `make docs`.
+- id: R-01
+  risk: "Rules are simplified, and some are marked 'to verify'."
+  mitigation: "Every rule in config/rules.yaml carries a source, last_checked date and a verified / to_verify badge shown in the UI."
+- id: R-02
+  risk: "FX rates and fees are simulated."
+  mitigation: "Labelled 'simulated' on every quote, card and receipt; production would take rates from the partner bank."
+- id: R-03
+  risk: "There is no real bank connection or KYC/AML screening."
+  mitigation: "Sandbox bank only; in production a licensed partner bank executes and performs KYC/AML."
+- id: R-04
+  risk: "Invoice extraction can fail on unusual layouts."
+  mitigation: "Schema-validated extraction with a deterministic regex fallback; mismatches with the registry block payment instead of passing."
+- id: R-05
+  risk: "The policy engine blocks wrong actions but cannot guarantee that wrong wording never appears."
+  mitigation: "All numbers come from code-generated cards; AI text is labelled AI-generated; refusals come from the deterministic request guard."
+- id: R-06
+  risk: "The Chinese text needs review by a native speaker."
+  mitigation: "Template-based Chinese summary with fixed wording; native-speaker review is on the release checklist."
+- id: R-07
+  risk: "Registry poisoning: the trust anchor is the registry itself."
+  mitigation: "Registry is a version-controlled file with verified_source per channel; production needs a signed, curated registry."
+- id: R-08
+  risk: "False positives can block legitimate invoices."
+  mitigation: "Blocked payments explain every signal and offer the lawful route (verify with the registry contact)."
+- id: R-09
+  risk: "Device secrets are stored in the browser (prototype); the server holds the HMAC key hash."
+  mitigation: "Production uses WebAuthn / passkeys (private keys never leave the device)."
+- id: R-10
+  risk: "Both approvers can be socially engineered together."
+  mitigation: "Both see the same fingerprint, payee verification and rule checks; Li Wei is prompted to compare with the university portal."
+- id: R-11
+  risk: "The deployment is a single-tenant SQLite."
+  mitigation: "Acceptable for a prototype; production would use a managed database with per-family isolation."
+- id: R-12
+  risk: "LLM availability and cost."
+  mitigation: "The security kernel needs no LLM; the mock provider keeps the app and tests working offline."
+- id: R-13
+  risk: "Dependency supply chain."
+  mitigation: "Minimal, pinned, permissively licensed dependencies listed in docs/THIRD_PARTY.md; no agent frameworks."
+- id: R-14
+  risk: "Insider or admin misuse (the freeze and advance-clock controls are privileged)."
+  mitigation: "Every admin action is written to the hash-chained audit log; production would require separate operator authentication."

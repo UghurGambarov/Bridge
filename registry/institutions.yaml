@@ -1,0 +1,76 @@
+# Verified institution registry — the trust anchor for payee verification.
+# ALL ENTRIES ARE FICTIONAL. Account identifiers contain "TEST". Never add real institutions.
+
+institutions:
+  - id: inst_northbridge
+    name: Northbridge University
+    country: UK
+    official_domains: [northbridge.ac.uk]
+    official_contact_email: finance@northbridge.ac.uk
+    reference_regex: "NBU-\\d{8}"
+    currency: GBP
+    # Accepted fee ranges per purpose, in the institution's currency.
+    fee_ranges:
+      tuition: ["10000.00", "16000.00"]
+      accommodation: ["5000.00", "9000.00"]
+      deposit: ["1000.00", "5000.00"]
+    # Published fee lines (shown in the UI / used by tests).
+    fees:
+      tuition_term: "13250.00"
+      accommodation_year: "7800.00"
+    deadlines: ["2026-10-31", "2026-11-30", "2027-01-31", "2027-04-30"]
+    channels:
+      - id: ch_northbridge_gbp
+        beneficiary_name: NORTHBRIDGE UNIVERSITY
+        bank_name: Sandbox Bank plc (fictional)
+        account_full: GB00TEST12345678
+        swift: TESTGB2L
+        currency: GBP
+        verified_source: "Registry entry confirmed via finance@northbridge.ac.uk (sandbox)"
+        verified_at: "2026-09-01T09:00:00"
+
+  - id: inst_pcit
+    name: Pacific Coast Institute of Technology
+    country: US
+    official_domains: [pcit.edu]
+    official_contact_email: bursar@pcit.edu
+    reference_regex: "PCIT-\\d{6}"
+    currency: USD
+    fee_ranges:
+      tuition: ["15000.00", "40000.00"]
+      accommodation: ["6000.00", "18000.00"]
+      deposit: ["500.00", "5000.00"]
+    fees: {}
+    deadlines: ["2026-08-15", "2027-01-10"]
+    channels:
+      - id: ch_pcit_usd
+        beneficiary_name: PACIFIC COAST INSTITUTE OF TECHNOLOGY
+        bank_name: Sandbox Trust Bank (fictional)
+        account_full: US00TEST22334455
+        swift: TESTUS33
+        currency: USD
+        verified_source: "Registry entry (sandbox)"
+        verified_at: "2026-09-01T09:00:00"
+
+  - id: inst_harbourview
+    name: Harbourview University
+    country: HK
+    official_domains: [harbourview.edu.hk]
+    official_contact_email: finance@harbourview.edu.hk
+    reference_regex: null
+    currency: HKD
+    fee_ranges:
+      tuition: ["50000.00", "250000.00"]
+      accommodation: ["10000.00", "60000.00"]
+      deposit: ["1000.00", "20000.00"]
+    fees: {}
+    deadlines: ["2026-09-01", "2027-01-15"]
+    channels:
+      - id: ch_harbourview_hkd
+        beneficiary_name: HARBOURVIEW UNIVERSITY
+        bank_name: Sandbox Harbour Bank (fictional)
+        account_full: HK00TEST33445566
+        swift: TESTHKHH
+        currency: HKD
+        verified_source: "Registry entry (sandbox)"
+        verified_at: "2026-09-01T09:00:00"

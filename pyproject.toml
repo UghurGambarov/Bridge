@@ -1,0 +1,12 @@
+[project]
+name = "bridge"
+version = "0.1.0"
+description = "Bridge - AI agent that pays tuition abroad safely (sandbox prototype)"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+
+[tool.pytest.ini_options]
+pythonpath = ["backend", "."]
+testpaths = ["backend/tests"]
+addopts = "-q"
+filterwarnings = ["ignore::DeprecationWarning"]

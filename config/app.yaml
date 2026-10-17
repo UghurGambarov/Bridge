@@ -1,0 +1,42 @@
+# Bridge sandbox and risk configuration (non-regulatory parameters).
+# Regulatory parameters live in config/rules.yaml.
+
+sandbox:
+  # The sandbox clock starts here (Beijing time, stored naive) and then runs in real time,
+  # plus any offset added with "Advance clock".
+  start_datetime: "2026-10-17T10:00:00"
+  timezone_label: "Beijing time (UTC+8)"
+  transfer_fee_cny: "50.00"
+  # Simulated rates: CNY per 1 unit of currency. Labelled "simulated" everywhere.
+  fx_rates_cny:
+    USD: "7.10"
+    GBP: "9.20"
+    HKD: "0.91"
+    EUR: "7.80"
+    CNY: "1.00"
+
+risk:
+  thresholds:
+    medium: 30   # LOW < 30 <= MEDIUM < 60 <= HIGH
+    high: 60
+  weights:
+    PAYEE_NOT_IN_REGISTRY: 50
+    ACCOUNT_MISMATCH: 70
+    NAME_MISMATCH: 30
+    PERSONAL_ACCOUNT_FOR_FEES: 100   # always forbidden (T4-001)
+    REFERENCE_FORMAT_MISMATCH: 15
+    LOOKALIKE_DOMAIN: 40
+    BANK_DETAILS_CHANGE_REQUEST: 40
+    HIDDEN_TEXT: 40
+    INJECTION_PHRASE: 40
+    INVISIBLE_UNICODE: 30
+    DISCOUNT_OFFER: 25
+    URGENCY: 15
+    AGENCY_INTERMEDIARY: 35
+    CRYPTO_MENTION: 100              # always forbidden (T4-005)
+    AMOUNT_OUTSIDE_FEE_RANGE: 20
+    DEADLINE_MISMATCH: 15
+  # A due date within this many days of a registry deadline is not a mismatch.
+  deadline_tolerance_days: 30
+  # Due dates closer than this get a "deadline soon" notice (not a fraud signal).
+  deadline_soon_days: 7
