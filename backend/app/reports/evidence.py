@@ -61,7 +61,7 @@ def summary(session: Session, model_label: str) -> dict:
     by_status: dict[str, int] = {}
     for i in intents:
         by_status[i.status] = by_status.get(i.status, 0) + 1
-    shots = sorted(p.name for p in (EVIDENCE_DIR / "screenshots").glob("*.png")) if (EVIDENCE_DIR / "screenshots").exists() else []
+    shots = sorted(p.name for p in (EVIDENCE_DIR / "screenshots").glob("*.png")) or         sorted(p.name for p in (ROOT / "docs" / "img").glob("*.png"))
     videos = sorted(p.name for p in (EVIDENCE_DIR / "video").glob("*") if p.suffix in (".webm", ".mp4")) \
         if (EVIDENCE_DIR / "video").exists() else []
     return {
@@ -102,9 +102,10 @@ def build_pack(session: Session, model_label: str) -> bytes:
             if p.exists():
                 z.write(p, f"scenario_report.{ext}")
         z.writestr("rules.md", rules_markdown())
-        for sub, pattern in (("screenshots", "*.png"), ("video", "*.webm"), ("video", "*.mp4")):
-            d = EVIDENCE_DIR / sub
-            if d.exists():
-                for p in sorted(d.glob(pattern)):
-                    z.write(p, f"{sub}/{p.name}")
+        shots = sorted((EVIDENCE_DIR / "screenshots").glob("*.png")) or sorted((ROOT / "docs" / "img").glob("*.png"))
+        for p in shots:  # latest autopilot run, else the committed copies in docs/img
+            z.write(p, f"screenshots/{p.name}")
+        for pattern in ("*.mp4", "*.webm"):
+            for p in sorted((EVIDENCE_DIR / "video").glob(pattern)) if (EVIDENCE_DIR / "video").exists() else []:
+                z.write(p, f"video/{p.name}")
     return buf.getvalue()

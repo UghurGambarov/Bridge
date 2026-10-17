@@ -72,7 +72,7 @@ export function Header({ evidence }: { evidence?: boolean }) {
         <div className="flex items-center gap-3">
           <ModelBadge />
           {evidence ? (
-            <button className="btn-ghost" onClick={() => navigate("/")}>← Back to chat</button>
+            <button data-testid="nav-chat" className="btn-ghost" onClick={() => navigate("/")}>← Back to chat</button>
           ) : (
             <button data-testid="nav-evidence" className="btn-ghost" onClick={() => navigate("/evidence")}>Evidence Center</button>
           )}

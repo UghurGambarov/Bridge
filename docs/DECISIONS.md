@@ -49,3 +49,11 @@ Where the spec was ambiguous we picked the simplest option that preserves the se
 37. **Upload sends the typed text with the document** (or a default "please check this document" message), so one action produces the full card sequence.
 38. **Results of operator controls** (advance clock, bank verification) are posted into the chat as "System" messages, not AI messages.
 39. **Docker.** Multi-stage build (Node 20 builds the UI, `python:3.11-slim` runs it), non-root user, health check, samples generated at build time, data in a named volume. `GIT_COMMIT` is passed as a build argument so the evidence pack can record it without git in the image.
+
+## Phase 4 — deliverables
+
+40. **`make evidence` needs no browser.** `scripts/run_demo.py` drives Flows 1–3 through the real API on a throw-away database, re-runs the scenario suite and writes `evidence/pack_<timestamp>.zip`. The pack includes the latest autopilot screenshots (or the committed copies in `docs/img/`) and video when present.
+41. **Autopilot waits on cards, not timeouts** (3-minute ceiling per wait), so a slow real model does not break the recording. `--pace` stretches captions for a voice-over; the default run is about 2 minutes with the mock model.
+42. **Generated media are not committed** except the 18 screenshots in `docs/img/` (used by the docs and the deck). Videos and evidence packs are git-ignored; they are produced locally and submitted separately.
+43. **The enforcement table lives in `scripts/build_docs.py`** (rule → file::function). A test fails if a rule has no entry or an entry names a function that does not exist, so the self-assessment cannot drift from the code.
+44. **Unverified facts stay marked.** Every regulatory source is listed in `docs/SOURCES.md` as "TODO: verify" until the team checks it; the matching rules keep `status: to_verify`.

@@ -291,7 +291,7 @@ def _verify(session, args, ctx, state, provider, d) -> ToolOutcome:
     cards = [pc]
     if pc.get("forbidden_rule"):
         r = refusal_card(pc["forbidden_rule"])
-        r["reason"] = "; ".join(s["explanation"] for s in pc.get("signals", [])[:4])
+        r["reason"] = " ".join(s["explanation"] for s in pc.get("signals", [])[:4])
         if pc.get("official_contact_email") or pc.get("mentioned_institution_id"):
             r["lawful_alternative"] += " A verification email can go only to the registry contact."
         cards.append(r)

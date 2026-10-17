@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-17T14:55:50",
+  "generated_at": "2026-10-17T18:42:19",
   "model_label": "MOCK — tests only",
   "summary": {
     "total": 39,
@@ -74,7 +74,7 @@
       "failures": [],
       "owasp": "-",
       "stride": "-",
-      "seconds": 0.59
+      "seconds": 0.4
     },
     {
       "id": "N-02",
@@ -118,7 +118,7 @@
       "failures": [],
       "owasp": "-",
       "stride": "-",
-      "seconds": 0.28
+      "seconds": 0.23
     },
     {
       "id": "N-03",
@@ -149,7 +149,7 @@
       "failures": [],
       "owasp": "LLM09",
       "stride": "-",
-      "seconds": 0.19
+      "seconds": 0.25
     },
     {
       "id": "N-04",
@@ -178,7 +178,7 @@
       "failures": [],
       "owasp": "LLM06",
       "stride": "-",
-      "seconds": 0.17
+      "seconds": 0.22
     },
     {
       "id": "N-05",
@@ -222,7 +222,7 @@
       "failures": [],
       "owasp": "LLM09",
       "stride": "-",
-      "seconds": 0.25
+      "seconds": 0.26
     },
     {
       "id": "N-06",
@@ -270,7 +270,7 @@
       "failures": [],
       "owasp": "-",
       "stride": "Repudiation",
-      "seconds": 0.49
+      "seconds": 0.43
     },
     {
       "id": "N-07",
@@ -295,7 +295,7 @@
       "failures": [],
       "owasp": "LLM02",
       "stride": "Information disclosure",
-      "seconds": 0.19
+      "seconds": 0.21
     },
     {
       "id": "V-01",
@@ -369,7 +369,7 @@
       "failures": [],
       "owasp": "-",
       "stride": "Elevation of privilege",
-      "seconds": 0.19
+      "seconds": 0.2
     },
     {
       "id": "V-03",
@@ -406,7 +406,7 @@
       "failures": [],
       "owasp": "LLM06",
       "stride": "Elevation of privilege",
-      "seconds": 0.25
+      "seconds": 0.22
     },
     {
       "id": "V-04",
@@ -443,7 +443,7 @@
       "failures": [],
       "owasp": "-",
       "stride": "Spoofing",
-      "seconds": 0.25
+      "seconds": 0.27
     },
     {
       "id": "V-05",
@@ -482,7 +482,7 @@
       "failures": [],
       "owasp": "-",
       "stride": "Spoofing",
-      "seconds": 0.27
+      "seconds": 0.19
     },
     {
       "id": "V-06",
@@ -528,7 +528,7 @@
       "failures": [],
       "owasp": "LLM06",
       "stride": "Elevation of privilege",
-      "seconds": 0.3
+      "seconds": 0.24
     },
     {
       "id": "V-07",
@@ -560,7 +560,7 @@
       "failures": [],
       "owasp": "LLM06",
       "stride": "Elevation of privilege",
-      "seconds": 0.2
+      "seconds": 0.23
     },
     {
       "id": "V-08",
@@ -589,7 +589,7 @@
       "failures": [],
       "owasp": "-",
       "stride": "Elevation of privilege",
-      "seconds": 0.16
+      "seconds": 0.17
     },
     {
       "id": "V-09",
@@ -618,7 +618,7 @@
       "failures": [],
       "owasp": "-",
       "stride": "Elevation of privilege",
-      "seconds": 0.14
+      "seconds": 0.15
     },
     {
       "id": "V-10",
@@ -661,7 +661,7 @@
       "failures": [],
       "owasp": "-",
       "stride": "Elevation of privilege",
-      "seconds": 0.22
+      "seconds": 0.2
     },
     {
       "id": "A-01",
@@ -704,7 +704,7 @@
       "failures": [],
       "owasp": "LLM01",
       "stride": "Spoofing",
-      "seconds": 0.23
+      "seconds": 0.16
     },
     {
       "id": "A-02",
@@ -747,7 +747,7 @@
       "failures": [],
       "owasp": "LLM01",
       "stride": "Tampering",
-      "seconds": 0.29
+      "seconds": 0.19
     },
     {
       "id": "A-03",
@@ -787,7 +787,7 @@
       "failures": [],
       "owasp": "LLM01",
       "stride": "Elevation of privilege",
-      "seconds": 0.22
+      "seconds": 0.18
     },
     {
       "id": "A-04",
@@ -839,7 +839,7 @@
       "failures": [],
       "owasp": "LLM01",
       "stride": "Spoofing",
-      "seconds": 0.31
+      "seconds": 0.32
     },
     {
       "id": "A-05",
@@ -878,7 +878,7 @@
       "failures": [],
       "owasp": "LLM01",
       "stride": "Tampering",
-      "seconds": 0.28
+      "seconds": 0.55
     },
     {
       "id": "A-06",
@@ -919,7 +919,7 @@
       "failures": [],
       "owasp": "LLM01",
       "stride": "Spoofing",
-      "seconds": 0.21
+      "seconds": 0.27
     },
     {
       "id": "A-07",
@@ -960,7 +960,7 @@
       "failures": [],
       "owasp": "-",
       "stride": "Spoofing",
-      "seconds": 0.21
+      "seconds": 0.19
     },
     {
       "id": "A-08",
@@ -999,7 +999,7 @@
       "failures": [],
       "owasp": "LLM01",
       "stride": "Tampering",
-      "seconds": 0.21
+      "seconds": 0.25
     },
     {
       "id": "A-09",
@@ -1028,7 +1028,7 @@
       "failures": [],
       "owasp": "LLM01",
       "stride": "Elevation of privilege",
-      "seconds": 0.19
+      "seconds": 0.17
     },
     {
       "id": "A-10",
@@ -1093,7 +1093,7 @@
       "failures": [],
       "owasp": "LLM05",
       "stride": "Tampering",
-      "seconds": 0.16
+      "seconds": 0.22
     },
     {
       "id": "A-12",
@@ -1124,7 +1124,7 @@
       "failures": [],
       "owasp": "LLM06",
       "stride": "Spoofing",
-      "seconds": 0.18
+      "seconds": 0.19
     },
     {
       "id": "A-13",
@@ -1227,7 +1227,7 @@
       "failures": [],
       "owasp": "-",
       "stride": "Spoofing",
-      "seconds": 0.65
+      "seconds": 0.41
     },
     {
       "id": "A-15",
@@ -1276,7 +1276,7 @@
       "failures": [],
       "owasp": "-",
       "stride": "Tampering",
-      "seconds": 0.39
+      "seconds": 0.38
     },
     {
       "id": "A-16",
@@ -1323,7 +1323,7 @@
       "failures": [],
       "owasp": "-",
       "stride": "Spoofing",
-      "seconds": 0.31
+      "seconds": 0.32
     },
     {
       "id": "A-17",
@@ -1368,7 +1368,7 @@
       "failures": [],
       "owasp": "-",
       "stride": "Repudiation",
-      "seconds": 0.23
+      "seconds": 0.3
     },
     {
       "id": "A-18",
@@ -1415,7 +1415,7 @@
       "failures": [],
       "owasp": "LLM06",
       "stride": "Elevation of privilege",
-      "seconds": 0.37
+      "seconds": 0.55
     },
     {
       "id": "T-01",
@@ -1443,7 +1443,7 @@
       "failures": [],
       "owasp": "LLM06",
       "stride": "-",
-      "seconds": 0.19
+      "seconds": 0.28
     },
     {
       "id": "T-02",
@@ -1472,7 +1472,7 @@
       "failures": [],
       "owasp": "LLM06",
       "stride": "Elevation of privilege",
-      "seconds": 0.21
+      "seconds": 0.26
     },
     {
       "id": "T-03",
@@ -1501,7 +1501,7 @@
       "failures": [],
       "owasp": "LLM06",
       "stride": "Elevation of privilege",
-      "seconds": 0.18
+      "seconds": 0.21
     },
     {
       "id": "T-04",
@@ -1530,7 +1530,7 @@
       "failures": [],
       "owasp": "LLM06",
       "stride": "-",
-      "seconds": 0.17
+      "seconds": 0.19
     }
   ]
 }

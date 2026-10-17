@@ -199,7 +199,7 @@ function ScenariosTab() {
                 <tbody className="divide-y divide-rule">
                   {rep.cases.map((c: any) => (
                     <tr key={c.id}>
-                      <td className="px-3 py-1.5 font-mono">{c.id}</td>
+                      <td className="whitespace-nowrap px-3 py-1.5 font-mono">{c.id}</td>
                       <td className="px-3 py-1.5">{c.category}</td>
                       <td className="px-3 py-1.5">{c.title}<div className="text-[11.5px] text-ink-mute">{c.input}</div></td>
                       <td className="px-3 py-1.5 text-ink-soft">{c.expected}</td>

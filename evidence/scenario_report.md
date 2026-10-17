@@ -1,6 +1,6 @@
 # Bridge — scenario suite report
 
-Generated 2026-10-17T14:55:50 · model: MOCK — tests only
+Generated 2026-10-17T18:42:19 · model: MOCK — tests only
 
 > SANDBOX — fictional institutions, simulated accounts and FX rates. Each case ran on a fresh temporary database.
 
