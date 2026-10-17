@@ -69,9 +69,9 @@ def scenario_markdown(r: dict) -> str:
 def write_scenario_reports(report: dict, out_dir: Path, stem: str = "scenario_report") -> list[Path]:
     out_dir.mkdir(parents=True, exist_ok=True)
     paths = [out_dir / f"{stem}.json", out_dir / f"{stem}.md", out_dir / f"{stem}.html"]
-    paths[0].write_text(to_json(report), encoding="utf-8")
-    paths[1].write_text(scenario_markdown(report), encoding="utf-8")
-    paths[2].write_text(SCENARIO_HTML.render(r=report, css=_BASE_CSS), encoding="utf-8")
+    paths[0].write_text(to_json(report), encoding="utf-8", newline="\n")
+    paths[1].write_text(scenario_markdown(report), encoding="utf-8", newline="\n")
+    paths[2].write_text(SCENARIO_HTML.render(r=report, css=_BASE_CSS), encoding="utf-8", newline="\n")
     return paths
 
 
