@@ -103,7 +103,7 @@ Without `.env` the app runs with the deterministic **mock** model, and the heade
 
 | `LLM_PROVIDER` | Settings |
 |---|---|
-| `openai_compatible` | `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL` — OpenAI, DeepSeek, Qwen (DashScope compatible mode), Ollama, OpenRouter… |
+| `openai_compatible` | `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL` — **Google Gemini API** (`https://generativelanguage.googleapis.com/v1beta/openai`, e.g. `gemini-3.5-flash`, key from Google AI Studio), OpenAI, DeepSeek, Qwen (DashScope compatible mode), Ollama, OpenRouter… |
 | `anthropic` | `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL` (default `claude-opus-5-5`); needs `pip install anthropic` (add it to the image if you use Docker) |
 
 The active provider and model are always shown in the UI header and written into the evidence metadata. Secrets come only from environment variables (`.env` is git-ignored).
@@ -153,6 +153,16 @@ Scenario suite run 2026-10-17T18:42:19 with model **MOCK — tests only**: **100
 | attack | 18 | 18 | 100.0% |
 | autonomy | 4 | 4 | 100.0% |
 <!-- /AUTO:RESULTS -->
+
+<!-- AUTO:RESULTS_REAL -->
+Chat-driven cases re-run 2026-10-17T19:48:11 with the real model **Google Gemini API · gemini-3.5-flash** (recorded separately in `evidence/scenario_report_real.*`): **100.0% (29/29)**.
+
+| Category | Passed | Total |
+|---|---|---|
+| normal | 5 | 5 |
+| violation | 9 | 9 |
+| attack | 15 | 15 |
+<!-- /AUTO:RESULTS_REAL -->
 
 Full report: [evidence/scenario_report.md](evidence/scenario_report.md).
 

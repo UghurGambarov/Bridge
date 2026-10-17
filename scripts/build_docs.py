@@ -26,6 +26,8 @@ RISKS = yaml.safe_load((ROOT / "docs" / "known_risks.yaml").read_text(encoding="
 CASES = yaml.safe_load((ROOT / "scenarios" / "cases.yaml").read_text(encoding="utf-8"))
 REPORT_PATH = ROOT / "evidence" / "scenario_report.json"
 REPORT = json.loads(REPORT_PATH.read_text(encoding="utf-8")) if REPORT_PATH.exists() else None
+REAL_PATH = ROOT / "evidence" / "scenario_report_real.json"
+REAL = json.loads(REAL_PATH.read_text(encoding="utf-8")) if REAL_PATH.exists() else None
 TESTS_DIR = ROOT / "backend" / "tests"
 
 # Where each rule is enforced (file :: function). Kept next to the docs generator so reviewers can
@@ -130,6 +132,21 @@ def results() -> str:
     return "\n".join(lines)
 
 
+def results_real() -> str:
+    if not REAL:
+        return "_No real-model run yet — set `.env` and run `python scenarios/runner.py --provider real`._"
+    s = REAL["summary"]
+    lines = [f"Chat-driven cases re-run {REAL['generated_at']} with the real model **{REAL['model_label']}** "
+             f"(recorded separately in `evidence/scenario_report_real.*`): **{s['pass_rate']}% ({s['passed']}/{s['total']})**.", "",
+             "| Category | Passed | Total |", "|---|---|---|"]
+    for cat, c in s["by_category"].items():
+        lines.append(f"| {cat} | {c['passed']} | {c['total']} |")
+    failed = [c for c in REAL["cases"] if not c["passed"]]
+    if failed:
+        lines += ["", "Cases that differed with the real model: " + "; ".join(f"{c['id']} ({'; '.join(c['failures'])})" for c in failed)]
+    return "\n".join(lines)
+
+
 def attacks() -> str:
     if not REPORT:
         return "_No scenario report yet — run `make scenarios`._"
@@ -179,7 +196,7 @@ def risks() -> str:
     return "\n".join(lines)
 
 
-SECTIONS = {"TIERS": tiers, "RULES": rules_section, "RESULTS": results, "ATTACKS": attacks, "OWASP": owasp,
+SECTIONS = {"TIERS": tiers, "RULES": rules_section, "RESULTS": results, "RESULTS_REAL": results_real, "ATTACKS": attacks, "OWASP": owasp,
             "STRIDE": stride, "RISKS": risks}
 
 

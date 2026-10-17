@@ -20,7 +20,8 @@ def get_provider(settings: Optional[Settings] = None, name: Optional[str] = None
     if provider == "openai_compatible":
         from .openai_compatible import OpenAICompatibleLLM
 
-        return OpenAICompatibleLLM(s.llm_base_url, s.llm_api_key, s.llm_model)
+        temperature = float(s.llm_temperature) if s.llm_temperature else None
+        return OpenAICompatibleLLM(s.llm_base_url, s.llm_api_key, s.llm_model, temperature=temperature)
     if provider == "anthropic":
         from .anthropic import AnthropicLLM
 

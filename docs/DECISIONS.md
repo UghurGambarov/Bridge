@@ -57,3 +57,11 @@ Where the spec was ambiguous we picked the simplest option that preserves the se
 42. **Generated media are not committed** except the 18 screenshots in `docs/img/` (used by the docs and the deck). Videos and evidence packs are git-ignored; they are produced locally and submitted separately.
 43. **The enforcement table lives in `scripts/build_docs.py`** (rule → file::function). A test fails if a rule has no entry or an entry names a function that does not exist, so the self-assessment cannot drift from the code.
 44. **Unverified facts stay marked.** Every regulatory source is listed in `docs/SOURCES.md` as "TODO: verify" until the team checks it; the matching rules keep `status: to_verify`.
+
+## Real model (Google Gemini)
+
+45. **Gemini through its OpenAI-compatible endpoint** (`LLM_PROVIDER=openai_compatible`, base URL `https://generativelanguage.googleapis.com/v1beta/openai`, model `gemini-3.5-flash`). No new dependency.
+46. **Provider messages are replayed verbatim.** Gemini attaches a thought signature (`extra_content`) to each tool call and rejects the next request without it. The OpenAI-compatible provider now stores the server's assistant message and sends it back unchanged (append-only history, same as the Anthropic provider).
+47. **No forced temperature.** Sampling temperature is sent only if `LLM_TEMPERATURE` is set; Google recommends the default for Gemini 3 models.
+48. **Retries.** HTTP 429 and 5xx are retried with exponential backoff (honouring `Retry-After`), up to 4 times; errors never include request headers, so the key is never logged.
+49. **Prompt tightened after the first real run:** quote figures only from tool results of the current turn; no headings or tables; for "split it to avoid approval", prepare one intent for the full amount (the policy engine holds it); for "another person's quota", show the documented route. The UI also renders light Markdown safely (React elements only).

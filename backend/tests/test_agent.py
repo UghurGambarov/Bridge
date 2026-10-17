@@ -197,8 +197,8 @@ def test_openai_compatible_parsing(monkeypatch):
     captured = {}
 
     class Resp:
-        def raise_for_status(self):
-            pass
+        status_code = 200
+        headers: dict = {}
 
         def json(self):
             return {"choices": [{"message": {"content": None, "tool_calls": [
@@ -242,3 +242,59 @@ def test_anthropic_wire_conversion():
 def test_extractor_schema_accepts_llm_json():
     ex = ExtractedDocument.model_validate({"doc_type": "invoice", "amount": 13250, "currency": "gbp"})
     assert ex.amount == Decimal("13250") and ex.currency == "GBP"
+
+
+def test_openai_compatible_replays_provider_message_verbatim(monkeypatch):
+    """Gemini rejects a follow-up unless each tool call's thought signature is sent back unchanged."""
+    from app.agent.llm import openai_compatible as oc
+
+    sent = []
+    reply = {"choices": [{"message": {"role": "assistant", "content": None, "tool_calls": [
+        {"id": "c1", "type": "function", "function": {"name": "check_quota", "arguments": '{"person_id":"p_zhang_min"}'},
+         "extra_content": {"google": {"thought_signature": "SIG123"}}}]}}]}
+
+    class Resp:
+        status_code = 200
+        headers: dict = {}
+
+        def json(self):
+            return reply
+
+    monkeypatch.setattr(oc.httpx, "post", lambda url, json=None, headers=None, timeout=None: (sent.append(json), Resp())[1])
+    llm = oc.OpenAICompatibleLLM("https://generativelanguage.googleapis.com/v1beta/openai", "k", "gemini-3.5-flash")
+    r = llm.chat([{"role": "user", "content": "quota?"}], tools.tool_schemas())
+    assert "temperature" not in sent[0]  # provider default unless LLM_TEMPERATURE is set
+    assert llm.label == "Google Gemini API · gemini-3.5-flash"
+    history = [{"role": "user", "content": "quota?"},
+               {"role": "assistant", "content": "", "tool_calls": [{"id": "c1", "name": "check_quota", "arguments": {}}],
+                **r.raw},
+               {"role": "tool", "tool_call_id": "c1", "name": "check_quota", "content": "{}"}]
+    llm.chat(history, tools.tool_schemas())
+    replayed = sent[1]["messages"][1]
+    assert replayed["tool_calls"][0]["extra_content"]["google"]["thought_signature"] == "SIG123"
+
+
+def test_openai_compatible_retries_rate_limits(monkeypatch):
+    from app.agent.llm import openai_compatible as oc
+
+    calls = {"n": 0}
+
+    class Resp:
+        def __init__(self, code):
+            self.status_code, self.headers, self.text = code, {"retry-after": "0"}, '{"error":{"message":"slow down"}}'
+
+        def json(self):
+            return {"choices": [{"message": {"content": "ok"}}]} if self.status_code == 200 else {"error": {"message": "slow down"}}
+
+    def fake_post(url, json=None, headers=None, timeout=None):
+        calls["n"] += 1
+        return Resp(429 if calls["n"] < 3 else 200)
+
+    monkeypatch.setattr(oc.httpx, "post", fake_post)
+    monkeypatch.setattr(oc.time, "sleep", lambda s: None)
+    llm = oc.OpenAICompatibleLLM("https://example.test/v1", "k", "m")
+    assert llm.chat([{"role": "user", "content": "hi"}], []).text == "ok" and calls["n"] == 3
+    calls["n"] = -100  # always 429 now
+    with pytest.raises(LLMError) as e:
+        llm.chat([{"role": "user", "content": "hi"}], [])
+    assert "HTTP 429" in str(e.value) and "slow down" in str(e.value)

@@ -30,6 +30,7 @@ class Settings:
     llm_base_url: str = field(default_factory=lambda: os.getenv("LLM_BASE_URL", ""))
     llm_api_key: str = field(default_factory=lambda: os.getenv("LLM_API_KEY", ""))
     llm_model: str = field(default_factory=lambda: os.getenv("LLM_MODEL", ""))
+    llm_temperature: str = field(default_factory=lambda: os.getenv("LLM_TEMPERATURE", "").strip())
     anthropic_api_key: str = field(default_factory=lambda: os.getenv("ANTHROPIC_API_KEY", ""))
     anthropic_model: str = field(default_factory=lambda: os.getenv("ANTHROPIC_MODEL", ""))
     data_dir: Path = field(default_factory=lambda: Path(os.getenv("DATA_DIR", str(ROOT / "data"))))
@@ -51,6 +52,8 @@ class Settings:
             return "MOCK — tests only"
         if self.llm_provider == "anthropic":
             return f"anthropic · {self.anthropic_model or 'claude-opus-5-5'}"
+        if "generativelanguage.googleapis.com" in self.llm_base_url:
+            return f"Google Gemini API · {self.llm_model or 'unset'}"
         return f"{self.llm_provider} · {self.llm_model or 'unset'}"
 
 

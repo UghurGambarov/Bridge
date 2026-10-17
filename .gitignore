@@ -17,3 +17,4 @@ evidence/video/
 evidence/screenshots/
 evidence/tmp/
 .claude/
+frontend/*.tsbuildinfo

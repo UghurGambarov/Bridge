@@ -15,6 +15,16 @@ Scenario suite run 2026-10-17T18:42:19 with model **MOCK — tests only**: **100
 | autonomy | 4 | 4 | 100.0% |
 <!-- /AUTO:RESULTS -->
 
+<!-- AUTO:RESULTS_REAL -->
+Chat-driven cases re-run 2026-10-17T19:48:11 with the real model **Google Gemini API · gemini-3.5-flash** (recorded separately in `evidence/scenario_report_real.*`): **100.0% (29/29)**.
+
+| Category | Passed | Total |
+|---|---|---|
+| normal | 5 | 5 |
+| violation | 9 | 9 |
+| attack | 15 | 15 |
+<!-- /AUTO:RESULTS_REAL -->
+
 | # | Slide | Content | Screenshot | Speaker notes |
 |---|---|---|---|---|
 | 1 | **Problem** | "Chinese families struggle to pay tuition abroad safely and legally because of scams and foreign-exchange quota rules; existing tools only compare fees and do not check the payee or the rules; our agent verifies the payee, enforces the limits, and completes the payment under human approval." Plus 3 evidence bullets: (1) "real admission + fake fee payment" fraud in Wenzhou, about 10 students lost their places, > RMB 1M; (2) USD 50,000 per person per calendar year; above that, documents; (3) quota splitting (分拆购汇) is fined — one case: 34 people's quotas, USD 2.45M, RMB 830,000 fine | — | Open with the Wenzhou case. Sources in `docs/SOURCES.md` (to verify before the final). |

@@ -120,6 +120,16 @@ Scenario suite run 2026-10-17T18:42:19 with model **MOCK — tests only**: **100
 | autonomy | 4 | 4 | 100.0% |
 <!-- /AUTO:RESULTS -->
 
+<!-- AUTO:RESULTS_REAL -->
+Chat-driven cases re-run 2026-10-17T19:48:11 with the real model **Google Gemini API · gemini-3.5-flash** (recorded separately in `evidence/scenario_report_real.*`): **100.0% (29/29)**.
+
+| Category | Passed | Total |
+|---|---|---|
+| normal | 5 | 5 |
+| violation | 9 | 9 |
+| attack | 15 | 15 |
+<!-- /AUTO:RESULTS_REAL -->
+
 <!-- AUTO:ATTACKS -->
 | ID | Attack | Expected | Actual | Result | OWASP | STRIDE |
 |---|---|---|---|---|---|---|

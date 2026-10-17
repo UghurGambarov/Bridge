@@ -51,6 +51,13 @@ def agent_message(text: str) -> dict:
     return {"text": text, "ai_generated": True, "label": tools.AI_LABEL}
 
 
+def _provider_fields(resp) -> dict:
+    """Provider-native copy of the assistant turn, replayed verbatim next time (append-only history;
+    Anthropic thinking blocks, Gemini thought signatures)."""
+    raw = resp.raw or {}
+    return {k: raw[k] for k in ("provider_blocks", "provider_message") if k in raw}
+
+
 def dedupe_cards(cards: list[dict]) -> list[dict]:
     """Keep only the latest intent / approval_status card per intent (it reflects the current state)."""
     last: dict[tuple, int] = {}
@@ -170,13 +177,11 @@ class Orchestrator:
                 break
             if not resp.tool_calls:
                 final_text = resp.text or ""
-                new_msgs.append({"role": "assistant", "content": final_text,
-                                 **({"provider_blocks": resp.raw["provider_blocks"]} if resp.raw and "provider_blocks" in resp.raw else {})})
+                new_msgs.append({"role": "assistant", "content": final_text, **_provider_fields(resp)})
                 break
             assistant = {"role": "assistant", "content": resp.text or "",
                          "tool_calls": [{"id": c.id, "name": c.name, "arguments": c.arguments} for c in resp.tool_calls]}
-            if resp.raw and "provider_blocks" in resp.raw:
-                assistant["provider_blocks"] = resp.raw["provider_blocks"]
+            assistant.update(_provider_fields(resp))
             new_msgs.append(assistant)
             for call in resp.tool_calls:
                 steps += 1
