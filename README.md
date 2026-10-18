@@ -75,61 +75,110 @@ Five security patterns:
 
 Details: [docs/TECHNICAL.md](docs/TECHNICAL.md).
 
-## Quickstart (Docker — about 3 minutes)
+## Run it yourself
+
+You do **not** need an API key: without one, Bridge uses its built-in demo model and the whole walkthrough below works (see [Talking to the AI agent](#talking-to-the-ai-agent)).
+
+### What you need
+
+- **Option A (easiest):** [Docker Desktop](https://www.docker.com/products/docker-desktop/) on Windows or macOS, or Docker Engine with Compose 2.24 or newer on Linux. Nothing else.
+- **Option B:** Python 3.11 or newer and Node.js 20 or newer.
+
+### Option A: Docker (first build takes a few minutes)
 
 ```bash
-git clone https://github.com/UghurGambarov/Bridge.git && cd Bridge
+git clone https://github.com/UghurGambarov/Bridge.git
+cd Bridge
 docker compose up --build
 ```
 
-Open **http://localhost:8000**:
-1. accept the sandbox consent;
-2. choose `northbridge_invoice_autumn.pdf` in **Sample docs…**;
-3. click **Review & approve** as **Mother**;
-4. switch to **Li Wei** and confirm.
+Open **http://localhost:8000**. Stop with `Ctrl+C`. If port 8000 is already in use, change `"8000:8000"` to `"8080:8000"` in `docker-compose.yml` and open http://localhost:8080.
 
-The receipt appears with the same fingerprint. Then try:
-- `agency_wechat_message.txt` with "这个可以付吗？";
-- `northbridge_invoice_hidden.pdf`;
-- **Evidence Center → Controls → Advance 1 month**;
-- "Send Li Wei an extra £2,000 now.";
-- `northbridge_invoice_accommodation.pdf`, then "用我哥哥的额度付吧".
+### Option B: without Docker
 
-The **Evidence Center** verifies the hash chain, simulates tampering on a copy, runs the scenario suite and exports the evidence pack. Demo mode with the caption bar: `/?demo=1`. Title cards: `/intro`, `/outro`.
+Windows (PowerShell):
 
-### Choosing the model (`.env`)
-
-Without `.env` the app runs with the deterministic **mock** model, and the header badge says `MOCK — tests only`. To use a real model, `cp .env.example .env` and set one of:
-
-| `LLM_PROVIDER` | Settings |
-|---|---|
-| `openai_compatible` | `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL` — **Google Gemini API** (`https://generativelanguage.googleapis.com/v1beta/openai`, e.g. `gemini-3.5-flash`, key from Google AI Studio), OpenAI, DeepSeek, Qwen (DashScope compatible mode), Ollama, OpenRouter… |
-| `anthropic` | `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL` (default `claude-opus-5-5`); needs `pip install anthropic` (add it to the image if you use Docker) |
-
-The active provider and model are always shown in the UI header and written into the evidence metadata. Secrets come only from environment variables (`.env` is git-ignored).
-
-## Development
-
-```bash
-python -m venv .venv && source .venv/bin/activate        # Windows: .venv\Scripts\activate
-make install            # pip install -r backend/requirements-dev.txt + npm ci (frontend)
-make samples            # fictional sample documents -> samples/
-make test               # unit + API tests + scenario suite (39 cases), offline, no API keys
-make frontend serve     # build the UI, then serve everything at http://localhost:8000
-make dev                # backend with reload (:8000) + Vite dev server (:5173)
+```powershell
+git clone https://github.com/UghurGambarov/Bridge.git
+cd Bridge
+python -m venv .venv
+.venv\Scripts\python -m pip install -r backend/requirements-dev.txt
+cd frontend; npm ci; npm run build; cd ..
+.venv\Scripts\python -m uvicorn --app-dir backend app.main:create_app --factory --port 8000
 ```
 
-Without `make` (e.g. on Windows), run the commands shown in the [Makefile](Makefile) directly.
+macOS / Linux:
+
+```bash
+git clone https://github.com/UghurGambarov/Bridge.git
+cd Bridge
+python3 -m venv .venv
+.venv/bin/python -m pip install -r backend/requirements-dev.txt
+(cd frontend && npm ci && npm run build)
+.venv/bin/python -m uvicorn --app-dir backend app.main:create_app --factory --port 8000
+```
+
+Open **http://localhost:8000**. The interactive API documentation is at http://localhost:8000/docs.
+
+## Talking to the AI agent
+
+### Without an API key (default)
+
+Bridge starts with its built-in **demo model**; the header shows `model: MOCK — tests only`. It is a scripted stand-in for the language model that understands the demo requests in English and Chinese. Everything that keeps the money safe works exactly as with a real model, because none of it depends on the model: document checks, payee verification, quota rules, refusals, approvals, payments, receipts, the audit log and the Evidence Center. Questions outside the demo get a short clarifying reply.
+
+### With a real model
+
+1. In the `Bridge` folder, copy `.env.example` to `.env` (Windows: `copy .env.example .env`; macOS/Linux: `cp .env.example .env`).
+2. Open `.env` and paste your key after `LLM_API_KEY=`. The file is already set up for Google Gemini (`gemini-3.5-flash`, the model used in our demo video); a free key is available at https://aistudio.google.com/apikey.
+3. Restart Bridge. With Docker: `Ctrl+C`, then `docker compose up` again. The header now shows `Google Gemini API · gemini-3.5-flash`.
+
+Other providers work through the same OpenAI-compatible setting; change `LLM_BASE_URL` and `LLM_MODEL` in `.env`:
+
+| Provider | `LLM_BASE_URL` | `LLM_MODEL` |
+|---|---|---|
+| Google Gemini (tested) | `https://generativelanguage.googleapis.com/v1beta/openai` | `gemini-3.5-flash` |
+| DeepSeek | `https://api.deepseek.com/v1` | `deepseek-chat` |
+| Alibaba Qwen (DashScope) | `https://dashscope.aliyuncs.com/compatible-mode/v1` | `qwen-plus` |
+
+Google's API is not reachable from mainland China; there, DeepSeek or Qwen can be used instead (we have tested Bridge with Gemini only). Anthropic models are also supported (`LLM_PROVIDER=anthropic`, `ANTHROPIC_API_KEY`; needs `pip install anthropic`). The key stays in your local `.env`, which is never committed (it is in `.gitignore`).
+
+## Demo walkthrough (about 5 minutes)
+
+1. Open http://localhost:8000 and click **I agree** (sandbox consent). You act as **Mother 妈妈** (top bar).
+2. **Pay the tuition.** In **Sample docs…** choose `northbridge_invoice_autumn.pdf`. Bridge explains the invoice in Chinese, verifies the payee, checks the quota and prepares the payment. Click **Review & approve**, then **Approve · 批准**, then **Close**.
+3. **Second approval.** Click **Li Wei** in the top bar, then **I agree**, **Review & confirm** and **Confirm — matches my portal**. Both dialogs show the same fingerprint. The payment is executed and a receipt card with a PDF link appears.
+4. **Agency scam.** Click **Mother 妈妈**. Click the suggestion **这个可以付吗？** (it fills the message box), then choose `agency_wechat_message.txt` in **Sample docs…**. The payment is blocked (rule T4-001) and a verification e-mail to the university's registered address is drafted.
+5. **Hidden instructions.** Choose `northbridge_invoice_hidden.pdf`. The hidden white text is revealed and the payee change is blocked (T4-006).
+6. **Autonomy.** Open **Evidence Center → Controls → Advance 1 month**, then **← Back to chat**: the monthly allowance was paid automatically, within limits (T2).
+7. **Limits.** Click the suggestion **Send Li Wei an extra £2,000 now.** and **Send**: the payment is held for approval because it is above the autonomous limit.
+8. **Lawful alternative.** Choose `northbridge_invoice_accommodation.pdf` (above the remaining quota, so the documented route is used), then click the suggestion **用我哥哥的额度付吧** and **Send**: refused (T4-003), with the lawful route explained.
+9. **Evidence Center.** Audit log → **Verify chain** and **Simulate tampering (on a copy)**; **Scenario results → Run suite**; **Export** for the evidence pack. **Controls → Reset sandbox** starts again from the beginning.
+
+Click **Why? · 为什么** on any payment to see every rule check with its source. Demo mode with the caption bar: `/?demo=1`. Title cards: `/intro`, `/outro`.
+
+## Running the tests
+
+```bash
+python -m pytest
+```
+
+Use `.venv\Scripts\python -m pytest` (Windows) or `.venv/bin/python -m pytest` (macOS/Linux) after Option B. This runs 244 tests offline in about a minute, including the 39-case scenario suite; no API key is needed. The test cases are listed in [docs/TEST_CASES.md](docs/TEST_CASES.md). `python scenarios/runner.py` writes the scenario report to `evidence/scenario_report.{json,md,html}`, and `python scenarios/runner.py --provider real` re-runs the chat cases with the model from your `.env`.
+
+## Development (make targets, Linux/macOS)
 
 | Target | What it does |
 |---|---|
-| `docker compose up --build` | App at http://localhost:8000 |
+| `make install` | `pip install -r backend/requirements-dev.txt` and `npm ci` for the frontend |
 | `make test` | Unit tests plus the scenario suite, offline (what CI runs) |
-| `make scenarios` | Scenario suite → `evidence/scenario_report.{json,md,html}` (`python scenarios/runner.py --provider real` re-runs the chat cases with your model and records them separately) |
+| `make frontend serve` | Build the UI, then serve everything at http://localhost:8000 |
+| `make dev` | Backend with reload (:8000) and the Vite dev server (:5173) |
+| `make scenarios` | Scenario suite → `evidence/scenario_report.{json,md,html}` |
 | `make evidence` | API-level Flows 1–3 + scenario suite + `evidence/pack_<timestamp>.zip` (no browser needed) |
 | `make autopilot` | Records `evidence/video/bridge_demo.{webm,mp4}` and 18 named screenshots (→ `docs/img/`) against the running app. Needs `pip install -r backend/requirements-demo.txt && python -m playwright install chromium`; ffmpeg optional |
 | `make docs` | Regenerates the `<!-- AUTO:… -->` doc sections and `docs/TEST_CASES.md` |
-| `make docs-pdf` | Docs as PDF (needs pandoc) |
+| `make samples` | Regenerates the fictional sample documents in `samples/` (they are already committed) |
+
+On Windows without `make`, run the command shown for each target in the [Makefile](Makefile) directly.
 
 The submitted demo video must be recorded with a real LLM. Set `.env`, start the app, then run `python scripts/demo_autopilot.py --pace 1.8` (about 4¼ minutes with Gemini). Time spent only waiting for the model is sped up 4× in `evidence/video/bridge_demo.mp4`, with an on-screen "⏩ sped up" badge; the unedited recording is kept next to it.
 
